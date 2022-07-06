@@ -1,0 +1,261 @@
+from kivy.app import App
+from kivy.uix.floatlayout import FloatLayout
+from kivy.uix.label import Label
+from kivy.uix.textinput import TextInput
+from kivy.uix.button import Button
+from kivy.uix.popup import Popup
+from functools import partial
+import random
+
+class Exe_game(FloatLayout):
+	def __init__(self, **kwargs):
+		super(Exe_game, self).__init__(**kwargs)
+		self.a=TextInput(multiline=True, font_size=50, pos_hint={'x':0, 'y':0.75}, size_hint=(1, 0.25), background_color=(0.933, 0.933, 0.933, 1), halign='center', readonly=False)
+		self.b=TextInput(multiline=True, font_size=40, pos_hint={'x':0.16, 'y':0.64},size_hint=(0.84, 0.11), background_color=(0, 1, 1, 1), readonly=False)
+		self.c=TextInput(multiline=True, font_size=40, pos_hint={'x':0.16, 'y':0.53},size_hint=(0.84, 0.11), background_color=(0, 1, 1, 1), readonly=False)
+		self.d=TextInput(multiline=True, font_size=40, pos_hint={'x':0.16, 'y':0.42},size_hint=(0.84, 0.11), background_color=(0, 1, 1, 1), readonly=False)
+		self.e=TextInput(multiline=True, font_size=40, pos_hint={'x':0.16, 'y':0.31},size_hint=(0.84, 0.11), background_color=(0, 1, 1, 1), readonly=False)
+		self.f=TextInput(multiline=True, font_size=40, pos_hint={'x':0, 'y':0.20},size_hint=(1, 0.11), background_color=(0, 1, 0.5, 1), readonly=False)
+		self.g=Button(text='A.', font_size=30, pos_hint={'x':0, 'y':0.64}, size_hint=(0.16, 0.11))
+		self.h=Button(text='B.', font_size=30, pos_hint={'x':0, 'y':0.53}, size_hint=(0.16, 0.11))
+		self.i=Button(text='C.', font_size=30, pos_hint={'x':0, 'y':0.42}, size_hint=(0.16, 0.11))
+		self.j=Button(text='D.', font_size=30, pos_hint={'x':0, 'y':0.31}, size_hint=(0.16, 0.11))
+		self.k=Button(text='Check', font_size=30, pos_hint={'x':0.667, 'y':0.1}, size_hint=(0.333, 0.1))
+		self.l=Button(text='Final Answer', font_size=30, pos_hint={'x':0.333, 'y':0.1}, size_hint=(0.333, 0.1))
+		self.m=Button(text='Lock', font_size=30, pos_hint={'x':0, 'y':0.1}, size_hint=(0.333, 0.1))
+		self.n=Button(text='Reset', font_size=30, pos_hint={'x':0, 'y':0}, size_hint=(0.333, 0.1))
+		self.o=Button(text='Exit', font_size=30, pos_hint={'x':0.667, 'y':0}, size_hint=(0.333, 0.1))
+		self.p=Button(text='Game Play', font_size=30, pos_hint={'x':0.333, 'y':0}, size_hint=(0.333, 0.1))
+		
+		self.g.bind(on_press=partial(self.answer, 'a'))
+		self.h.bind(on_press=partial(self.answer, 'b'))
+		self.i.bind(on_press=partial(self.answer, 'c'))
+		self.j.bind(on_press=partial(self.answer, 'd'))
+		
+		self.k.bind(on_press=self.check)
+		self.l.bind(on_press=partial(self.locked, '1'))
+		self.m.bind(on_press=partial(self.locked, '2'))
+		self.n.bind(on_press=self.reset)
+		self.o.bind(on_press=self.exits)
+		self.p.bind(on_press=self.pop_start_game)
+		self.widgets()
+	def widgets(self):	
+		self.add_widget(self.a)
+		self.add_widget(self.b)
+		self.add_widget(self.c)
+		self.add_widget(self.d)
+		self.add_widget(self.e)
+		self.add_widget(self.f)
+		self.add_widget(self.g)
+		self.add_widget(self.h)
+		self.add_widget(self.i)
+		self.add_widget(self.j)
+		self.add_widget(self.k)
+		self.add_widget(self.l)
+		self.add_widget(self.m)
+		self.add_widget(self.n)
+		self.add_widget(self.o)
+		self.add_widget(self.p)
+		self.evnt1_lock(True, False)
+		self.btn_disabl(True)
+	def buttons(self, txt, y):
+		Button(text=txt, font_size=30, pos_hint={'x':0, 'y':y}, size_hint=(0.16, 0.11))
+	def answer(self, answr, instance):
+		global answ
+		answ=[]
+		if answr=='a':
+			self.b.background_color=(0.7, 0.2, 1, 1)
+		elif answr=='b':
+			self.c.background_color=(0.7, 0.2, 1, 1)
+		elif answr=='c':
+			self.d.background_color=(0.7, 0.2, 1, 1)
+		elif answr=='d':
+			self.e.background_color=(0.7, 0.2, 1, 1)
+		if not answr=='a':
+			self.b.background_color=(0, 1, 1, 1)
+		if not answr=='b':
+			self.c.background_color=(0, 1, 1, 1)
+		if not answr=='c':
+			self.d.background_color=(0, 1, 1, 1)
+		if not answr=='d':
+			self.e.background_color=(0, 1, 1, 1)
+		answ.append(answr)
+	def validate_answr(self):
+		try:
+			answ!=[]
+			return True
+		except:
+			self.pop_warnings('Close Window', 'Select Answer')
+			return False
+	def locked(self, lak, instance):
+		if lak=='1':
+			if self.validate_answr():
+				self.btn_disabl(True)
+				self.evnt3_check(True, False)
+		elif lak=='2':
+			if self.check_input() and self.match_answr() and self.check_len_text():
+				self.btn_disabl(False)
+				self.txt_rid_only(True)
+				self.pop_warnings('Press Me.','\n\n\nNow Your Turn.\n\n\nChoose your answer, then press the final answer button')
+				self.evnt2_fnal_ans(True, False)
+	def check_len_text(self):
+		
+		if len(self.a.text)<=150 and len(self.b.text)<=95 and len(self.c.text)<=95 and len(self.d.text)<=95 and len(self.e.text)<=95:
+			return True
+		else:
+			if len(self.a.text)>150:
+				self.pop_char_len(f'Out of range character on the top input box, 150 character allowed, you type {len(self.a.text)}')
+			if len(self.b.text)>95:
+				self.pop_char_len(f'Out of range character on the letter A input box, 95 character allowed, you type {len(self.b.text)}')
+			if len(self.c.text)>95:
+				self.pop_char_len(f'Out of range character on the letter B input box, 95 character allowed, you type {len(self.c.text)}')
+			if len(self.d.text)>95:
+				self.pop_char_len(f'Out of range character on the letter C input box, 95 character allowed, you type {len(self.d.text)}')
+			if len(self.e.text)>95:
+				self.pop_char_len(f'Out of range character on the letter D input box, 95 character allowed, you type {len(self.e.text)}')	
+			return False
+			
+	def txt_rid_only(self, ridonly):
+		self.a.readonly=ridonly
+		self.b.readonly=ridonly
+		self.c.readonly=ridonly
+		self.d.readonly=ridonly
+		self.e.readonly=ridonly
+		self.f.readonly=ridonly
+		self.f.password=ridonly
+	def bckgrnd_color(self, clor):
+		self.b.background_color=clor
+		self.c.background_color=clor
+		self.d.background_color=clor
+		self.e.background_color=clor
+	def evnt1_lock(self, disabl, disabl2):
+		self.k.disabled=disabl
+		self.l.disabled=disabl
+		self.n.disabled=disabl
+		self.m.disabled=disabl2
+	def evnt2_fnal_ans(self, disabl, disabl2):
+		self.k.disabled=disabl
+		self.m.disabled=disabl
+		self.n.disabled=disabl
+		self.l.disabled=disabl2
+	def evnt3_check(self, disabl, disabl2):
+		self.l.disabled=disabl
+		self.m.disabled=disabl
+		self.n.disabled=disabl
+		self.k.disabled=disabl2
+	def evnt4_reset(self, disabl, disabl2):
+		self.l.disabled=disabl
+		self.m.disabled=disabl
+		self.k.disabled=disabl
+		self.n.disabled=disabl2
+	def btn_disabl(self, disabl):
+		self.g.disabled=disabl
+		self.h.disabled=disabl
+		self.i.disabled=disabl
+		self.j.disabled=disabl
+	def check(self, instance):
+		self.f.password=False
+		ref=self.f.text.strip()
+		ref=self.f.text.lower()
+		if answ[0]=='a':
+			ans=self.b.text.strip()
+			ans=self.b.text.lower()
+			if ref==ans:
+				self.pop_win()
+			else:
+				self.pop_loose()
+		elif answ[0]=='b':
+			ans=self.c.text.strip()
+			ans=self.c.text.lower()
+			if ref==ans:
+				self.pop_win()
+			else:
+				self.pop_loose()
+		elif answ[0]=='c':
+			ans=self.d.text.strip()
+			ans=self.d.text.lower()
+			if ref==ans:
+				self.pop_win()
+			else:
+				self.pop_loose()
+		elif answ[0]=='d':
+			ans=self.e.text.strip()
+			ans=self.e.text.lower()
+			if ref==ans:
+				self.pop_win()
+			else:
+				self.pop_loose()
+		self.evnt4_reset(True, False)
+	def check_input(self):
+		if self.a.text=='' or self.b.text=='' or self.c.text=='' or self.d.text=='' or self.e.text=='' or self.f.text=='':
+			self.pop_warnings('Close Window', 'No Text Input')
+			return False
+		else:
+			return True
+	def match_answr(self):
+		ref=self.f.text.strip()
+		ref=self.f.text.lower()
+		ans1=self.b.text.strip()
+		ans1=self.b.text.lower()
+		ans2=self.c.text.strip()
+		ans2=self.c.text.lower()
+		ans3=self.d.text.strip()
+		ans3=self.d.text.lower()
+		ans4=self.e.text.strip()
+		ans4=self.e.text.lower()
+		if ref=='a':
+			self.f.text=ans1
+		elif ref=='b':
+			self.f.text=ans2
+		elif ref=='c':
+			self.f.text=ans3
+		elif ref=='d':
+			self.f.text=ans4
+			
+		list=[ans1, ans2, ans3, ans4]
+		if ref in list:
+			return True
+		else:
+			self.pop_warnings('Close Window', 'The Answer Doesn\'t Match the Choices')
+			return False
+		
+	def pop_warnings(self, txt, title):
+		content=Button(text=txt, size_hint=(0.3, 0.9), background_color=(0, 0.9, 0, 1), font_size=35,)
+		pop_win=Popup(title=title, content=content, size_hint=(0.5, 0.5), title_size=35, title_align='center', auto_dismiss=False)
+		content.bind(on_press=pop_win.dismiss)
+		pop_win.open()
+
+	def pop_win(self):
+		content=Button(text='Close Window', size_hint=(0.3, 0.3), background_color=(0, 0.9, 0, 1), font_size=35,)
+		pop_win=Popup(title='Congratulation\'s!!!\n You got the right answer', content=content, size_hint=(0.6, 0.5), title_size=40, auto_dismiss=False)
+		content.bind(on_press=pop_win.dismiss)
+		pop_win.open()
+	def pop_loose(self):
+		content=Button(text='Close Window', size_hint=(0.3, 0.3), background_color=(0, 0.9, 0, 1), font_size=35,)
+		pop_win=Popup(title='Sorry.\n\nWrong Answer.', content=content, size_hint=(0.5, 0.5), title_size=40, auto_dismiss=False)
+		content.bind(on_press=pop_win.dismiss)
+		pop_win.open()
+	def pop_start_game(self, instance):
+		content=Button(text='Close Window', size_hint=(0.1, 0.1), background_color=(0, 0.9, 0, 1), font_size=35,)
+		pop_win=Popup(title='Game Rule:\n Player 1:\nType your question at the Top Input Box, then your choices and type the letter of the correct answer at the Answer Box(at the bottom), when done press lock. \nPlayer 2: \n Choose the letter, then press final answer button, then press the check button', content=content, size_hint=(1, 1), title_size=45, auto_dismiss=False)
+		content.bind(on_press=pop_win.dismiss)
+		pop_win.open()
+	def pop_char_len(self, title):
+		content=Button(text='Close Window', size_hint=(0.3, 0.3), background_color=(0, 0.9, 0, 1), font_size=35,)
+		pop_win=Popup(title=title, content=content, size_hint=(0.6, 0.5), title_size=30, auto_dismiss=False)
+		content.bind(on_press=pop_win.dismiss)
+		pop_win.open()
+	def exits(self, instance):
+		exit()
+	def reset(self, instance):
+		self.__init__()
+
+
+	
+class GuessingApp(App):
+	def build(self):
+		return Exe_game()	
+
+		
+if __name__=='__main__':
+	GuessingApp().run()
